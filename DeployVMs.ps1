@@ -8,7 +8,7 @@ Select-AzureRmSubscription -SubscriptionId
 
 #variable values
 $Location = "West Europe"
-$RGname = "Marty-DeployVMs"
+$RGname = "MyTestLab"
 $VNETname = "MyVNET"
 
 #Create Resource Group
@@ -25,18 +25,19 @@ $newVNET = New-AzureRmVirtualNetwork -Name $VNETname -ResourceGroupName $RGname 
 Add-AzureRmVirtualNetworkSubnetConfig -Name "FrontEndSubnet" -VirtualNetwork $newVNET -AddressPrefix "168.10.1.0/24" 
 Add-AzureRmVirtualNetworkSubnetConfig -Name "BackEndSubnet" -VirtualNetwork $newVNET -AddressPrefix "168.10.2.0/24" 
 
+help Add-AzureRmVirtualNetworkSubnetConfig -ShowWindow
+
 Set-AzureRmVirtualNetwork -VirtualNetwork $newVNET
 #endregion
 
 #region
-#Create public IP
-$publicIP = New-AzureRmPublicIpAddress -ResourceGroupName $RGname -Location $Location -AllocationMethod Static -Name Server-Xpip
 
 #Create Network Card Interface
 $getmyVNET = Get-AzureRmVirtualNetwork -ResourceGroupName $RGname -Name $VNETname
 
-$nic = New-AzureRmNetworkInterface -ResourceGroupName $RGname -Location $Location -Name justNic -SubnetId $getmyVNET.Subnets[0].Id -PublicIpAddressId $publicIP.Id 
-
+$nic = New-AzureRmNetworkInterface -ResourceGroupName $RGname -Location $Location -Name justNic -SubnetId $getmyVNET.Subnets[0].Id
+ -PublicIpAddressId $publicIP.Id 
+#$nic = Get-AzureRmNetworkInterface -ResourceGroupName $RGname -Name justNic
 
 #NSG Create Rules
 $nsgRDP = New-AzureRmNetworkSecurityRuleConfig -Name AllowRDP -Protocol Tcp -Direction Inbound -Priority 1000 `
@@ -92,8 +93,6 @@ New-AzureRmVM -ResourceGroupName $RGname -Location $Location -VM $vmConfig
 
 
 
-
-
 $nic = Get-AzureRmNetworkInterface -Name justnic -ResourceGroupName $RGname
 
 
@@ -109,7 +108,7 @@ $healthProbe = New-AzureRmLoadBalancerProbeConfig -Name HealthProbe -Protocol Tc
 #Creating a load balancer
 $LB = New-AzureRmLoadBalancer -ResourceGroupName $RGname -Name LoadBalancer -Location $Location -FrontendIpConfiguration $frontendIP -InboundNatRule $inboundNATRule -BackendAddressPool $beAddressPool -Probe $healthProbe
 
-#OK
+
 #############################################################################################################################################
 $nic.IpConfigurations[0].LoadBalancerBackendAddressPools = $beaddresspool
 $nic.IpConfigurations[0].LoadBalancerInboundNatRules.Add($lb.InboundNatRules[0])
@@ -118,5 +117,6 @@ Set-AzureRmNetworkInterface -NetworkInterface $nic
 
 
 
-$ip = (Get-AzureRmPublicIpAddress -ResourceGroupName $RGname).IpAddress[0]
+#$ip = (Get-AzureRmPublicIpAddress -ResourceGroupName $RGname).IpAddress[0]
+$ip = (Get-AzureRmPublicIpAddress -ResourceGroupName $RGname).IpAddress
 mstsc /v:$ip':33445'
