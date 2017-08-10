@@ -8,12 +8,10 @@ Select-AzureRmSubscription -SubscriptionId
 
 #Describe Parameters
 $Location = "West Europe"
-$RGname = "Marty-ARM-DeployVMs"
-$jsonLoc = "D:\OneDrive\Cloud\VStudioProjects\LB-VM\LB-VM\azuredeploy.json"
+$RGname = "My-ARM-VMs2"
+$jsonLoc = ".\azuredeploy.json"
 
 #ARM template variables
-$vmUsername = 'marvlk'
-$VMPassword = 'AnotherPass789'
 $VMNamePrefix = "Server-"
 $vmSize = 'Standard_A2'
 $SKU = '2016-Datacenter'
@@ -22,13 +20,13 @@ New-AzureRmResourceGroup -Name $rgName -Location $Location
 
 
 $VMDeployment = @{
-    Name = 'JuneWorkshop';
+    Name = 'Workshop';
     ResourceGroupName = $RGname;
     Mode = 'Incremental';
     TemplateFile = $jsonLoc;
     TemplateParameterObject = @{
-        adminUsername = $vmUsername;
-        adminPassword = $VMPassword;
+        adminUsername = '';
+        adminPassword = '';
         vmNamePrefix = $VMNamePrefix;
         vnetName = $VNETName;
         vmSize = $vmSize;
